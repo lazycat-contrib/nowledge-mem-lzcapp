@@ -1,0 +1,16 @@
+params:
+  - id: ip_allowlist
+    type: string
+    name: "IP Allowlist"
+    description: "Allowed IP addresses/CIDR ranges, comma-separated (e.g. 0.0.0.0/0,::/0 for all)"
+    default_value: "0.0.0.0/0,::/0"
+
+locales:
+  zh:
+    ip_allowlist:
+      name: "IP 白名单"
+      description: "允许访问的 IP 地址/CIDR 范围，逗号分隔（如 0.0.0.0/0,::/0 表示允许所有）"
+  en:
+    ip_allowlist:
+      name: "IP Allowlist"
+      description: "Allowed IP addresses/CIDR ranges, comma-separated (e.g. 0.0.0.0/0,::/0 for all)"

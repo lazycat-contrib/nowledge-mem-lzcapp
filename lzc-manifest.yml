@@ -1,0 +1,30 @@
+application:
+  subdomain: nowledge-mem
+  entries:
+    - id: main
+      title: "Main"
+      path: /app
+  upstreams:
+    - location: /
+      backend: http://mem:14242/
+
+services:
+  mem:
+    image: docker.1ms.run/nowledgelabs/mem:0.8.8
+    user: "root"
+    environment:
+      - NOWLEDGE_IP_ALLOWLIST={{.U.ip_allowlist}}
+    binds:
+      - /lzcapp/var/data:/var/lib/nowledge-mem
+      - /lzcapp/var/config:/etc/nowledge-mem
+      - /lzcapp/cache/nowledge-mem:/var/cache/nowledge-mem
+    healthcheck:
+      test:
+        - CMD
+        - /opt/nowledge-mem/python/bin/python3
+        - "-c"
+        - "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:14242/livez', timeout=4).status==200 else 1)"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 90s

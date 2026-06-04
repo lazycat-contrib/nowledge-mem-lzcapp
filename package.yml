@@ -1,0 +1,21 @@
+package: community.lazycat.app.nowledge-mem
+version: 0.8.8
+name: Nowledge Mem
+description: "AI tools change.Your memory should not."
+author: "nowledge-co"
+homepage: https://mem.nowledge.co
+min_os_version: 1.5.0
+
+locales:
+  zh:
+    name: "Nowledge Mem"
+    description: "你的智能体、AI 助手、代码工具，共享一套记忆"
+    entries.main.title: "主界面"
+  en:
+    name: "Nowledge Mem"
+    description: "Your intelligences, AI assistants, and code tools share a set of memories."
+    entries.main.title: "Main"
+
+permissions:
+  required:
+    - net.internet

@@ -1,0 +1,16 @@
+manifest: ./lzc-manifest.yml
+pkgout: ./
+icon: ./icon.png
+
+compose_override:
+  services:
+    mem:
+      read_only: true
+      tmpfs:
+        - /tmp:size=64m,mode=1777
+      cap_drop:
+        - ALL
+      security_opt:
+        - no-new-privileges:true
+      pids_limit: 512
+      mem_reservation: 1g
