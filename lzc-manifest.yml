@@ -4,6 +4,10 @@ application:
     - id: main
       title: "Main"
       path: /app
+
+  public_path:
+    - /
+
   upstreams:
     - location: /
       backend: http://mem:14242/
