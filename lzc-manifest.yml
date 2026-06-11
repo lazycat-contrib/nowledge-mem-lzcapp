@@ -15,7 +15,7 @@ application:
 services:
   mem:
     # https://www.wangdu.site/course/2109.html
-    image: registry.cyou/nowledgelabs/mem:0.9.2
+    image: registry.cyou/nowledgelabs/mem:0.9.3
     user: "root"
     environment:
       - NOWLEDGE_IP_ALLOWLIST={{.U.ip_allowlist}}
