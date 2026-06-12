@@ -49,6 +49,13 @@ params:
     default_value: "true"
     optional: false
 
+  - id: snap_oidc_allowed_domains
+    type: string
+    name: "Snap OIDC Allowed Domains"
+    description: "Comma-separated list of allowed email domains for Memory Snap OIDC login (e.g. example.com). Leave empty to allow all."
+    default_value: ""
+    optional: true
+
 locales:
   zh:
     ip_allowlist:
@@ -72,7 +79,9 @@ locales:
     snap_oidc_enabled:
       name: "启用快照 OIDC 单点登录"
       description: "启用记忆快照的懒猫平台 OpenID Connect 单点登录。客户端 ID/Secret 和回调地址由平台自动配置。"
-
+    snap_oidc_allowed_domains:
+      name: "快照 OIDC 允许域名"
+      description: "记忆快照 OIDC 登录允许的邮箱域名列表，逗号分隔（如 example.com）。留空则不限制。"
   en:
     ip_allowlist:
       name: "IP Allowlist"
@@ -95,3 +104,6 @@ locales:
     snap_oidc_enabled:
       name: "Enable Snap OIDC"
       description: "Enable LazyCat platform OpenID Connect single sign-on for Memory Snap. Client ID/Secret and Redirect URL are auto-configured."
+    snap_oidc_allowed_domains:
+      name: "Snap OIDC Allowed Domains"
+      description: "Comma-separated list of allowed email domains for Memory Snap OIDC login (e.g. example.com). Leave empty to allow all."

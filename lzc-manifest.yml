@@ -58,6 +58,8 @@ services:
     # czyt/nowledge-mem-snap:v0.2.0
     image: registry.lazycat.cloud/czyt/czyt/nowledge-mem-snap:5c08504bb36e4990
     user: root
+    depends_on:
+      - mem
     environment:
       - DATA_DIR=/app/data
       - PORT=14335
@@ -80,7 +82,9 @@ services:
       - NMEM_SNAP_OIDC_CLIENT_ID=${LAZYCAT_AUTH_OIDC_CLIENT_ID}
       - NMEM_SNAP_OIDC_CLIENT_SECRET=${LAZYCAT_AUTH_OIDC_CLIENT_SECRET}
       - NMEM_SNAP_OIDC_REDIRECT_URL=https://${LAZYCAT_APP_DOMAIN}/snap/auth/oidc/callback
-
+{{- if .U.oidc_allowed_domains }}
+      - NMEM_SNAP_OIDC_ALLOWED_DOMAINS={{ .U.oidc_allowed_domains }}
+{{- end }}
     healthcheck:
       test:
         - CMD
