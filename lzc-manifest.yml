@@ -1,16 +1,36 @@
 application:
   subdomain: nowledge-mem
+  oidc_redirect_path: /snap/auth/oidc/callback
   entries:
     - id: main
       title: "Main"
       path: /app
+    - id: snap
+      title: "Memory Snap"
+      path: /snap
 
   public_path:
     - /
+    - /snap
+    - /snap/
 
   upstreams:
     - location: /
       backend: http://mem:14242/
+
+    - location: /snap/
+      backend: http://nowledge-mem-snap:14335
+      disable_trim_location: true
+
+  injects:
+    - id: snap-login-autofill
+      when:
+        - /snap/login
+      do:
+        - src: builtin://simple-inject-password
+          params:
+            user: "{{ .U.snap_admin_username }}"
+            password: "{{ .U.snap_admin_password }}"
 
 services:
   mem:
@@ -33,3 +53,45 @@ services:
       timeout: 5s
       retries: 3
       start_period: 90s
+
+  nowledge-mem-snap:
+    # czyt/nowledge-mem-snap:v0.2.0
+    image: registry.lazycat.cloud/czyt/czyt/nowledge-mem-snap:5c08504bb36e4990
+    user: root
+    environment:
+      - DATA_DIR=/app/data
+      - PORT=14335
+      - TZ={{.U.snap_tz}}
+      - NMEM_SNAP_BASE_PATH=/snap
+      - NMEM_SNAP_ADMIN_USERNAME={{.U.snap_admin_username}}
+      - NMEM_SNAP_ADMIN_PASSWORD={{.U.snap_admin_password}}
+      - NMEM_SNAP_SESSION_SECRET={{.U.snap_session_secret}}
+      - NMEM_SNAP_LOG_LEVEL=info
+      - NMEM_SNAP_LOG_FILE=/app/data/logs/nowledge-mem-snap.log
+      - NMEM_SNAP_LOG_MAX_SIZE_MB=20
+      - NMEM_SNAP_LOG_MAX_BACKUPS=7
+      - NMEM_SNAP_LOG_MAX_AGE_DAYS=30
+      - NMEM_SNAP_LOG_COMPRESS=true
+      - NMEM_API_URL=http://mem:14242
+      - NMEM_API_KEY={{.U.snap_nmeme_api_key}}
+      # OIDC — Issuer/Client ID/Secret/Redirect 由懒猫平台自动注入
+      - NMEM_SNAP_OIDC_ENABLED={{.U.snap_oidc_enabled}}
+      - NMEM_SNAP_OIDC_ISSUER_URL=${LAZYCAT_AUTH_OIDC_ISSUER_URI}
+      - NMEM_SNAP_OIDC_CLIENT_ID=${LAZYCAT_AUTH_OIDC_CLIENT_ID}
+      - NMEM_SNAP_OIDC_CLIENT_SECRET=${LAZYCAT_AUTH_OIDC_CLIENT_SECRET}
+      - NMEM_SNAP_OIDC_REDIRECT_URL=https://${LAZYCAT_APP_DOMAIN}/snap/auth/oidc/callback
+      - NMEM_SNAP_OIDC_ALLOWED_DOMAINS={{.U.oidc_allowed_domains}}
+    healthcheck:
+      test:
+        - CMD
+        - wget
+        - --no-verbose
+        - --tries=1
+        - --spider
+        - http://localhost:14335/healthz
+      interval: 30s
+      timeout: 3s
+      start_period: 5s
+      retries: 3
+    binds:
+      - /lzcapp/var/snap-data:/app/data

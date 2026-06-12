@@ -1,16 +1,109 @@
 params:
+  # Nowledge Mem 主服务参数
   - id: ip_allowlist
     type: string
     name: "IP Allowlist"
     description: "Allowed IP addresses/CIDR ranges, comma-separated (e.g. 0.0.0.0/0,::/0 for all)"
     default_value: "0.0.0.0/0,::/0"
 
+  # Nowledge Mem Snap 参数
+  - id: snap_admin_username
+    type: string
+    name: "Snap Admin Username"
+    description: "Bootstrap administrator username for Memory Snap initial login"
+    default_value: "admin"
+    optional: false
+
+  - id: snap_admin_password
+    type: secret
+    name: "Snap Admin Password"
+    description: "Bootstrap administrator password for Memory Snap (auto-generated random password recommended)"
+    default_value: "$random(len=20)"
+    optional: false
+
+  - id: snap_session_secret
+    type: secret
+    name: "Snap Session Secret"
+    description: "Secret key for Memory Snap session encryption (auto-generated random value recommended)"
+    default_value: "$random(len=32)"
+    optional: false
+
+  - id: snap_tz
+    type: string
+    name: "Snap Timezone"
+    description: "Memory Snap schedule times and retention boundaries timezone (e.g. UTC, Asia/Shanghai, America/New_York)"
+    default_value: "Asia/Shanghai"
+    optional: false
+
+  - id: snap_nmeme_api_key
+    type: secret
+    name: "Snap Nowledge Mem API Key"
+    description: "API key for the Nowledge Mem API source in Memory Snap. Leave empty to configure later."
+    default_value: ""
+    optional: true
+
+  - id: snap_oidc_enabled
+    type: bool
+    name: "Enable Snap OIDC"
+    description: "Enable LazyCat platform OpenID Connect single sign-on for Memory Snap. Client ID/Secret and Redirect URL are auto-configured."
+    default_value: "true"
+    optional: false
+
+  - id: snap_oidc_allowed_domains
+    type: string
+    name: "Snap OIDC Allowed Domains"
+    description: "Comma-separated list of allowed email domains for Memory Snap OIDC login (e.g. example.com). Leave empty to allow all."
+    default_value: ""
+    optional: true
+
 locales:
   zh:
     ip_allowlist:
       name: "IP 白名单"
       description: "允许访问的 IP 地址/CIDR 范围，逗号分隔（如 0.0.0.0/0,::/0 表示允许所有）"
+    snap_admin_username:
+      name: "快照管理员用户名"
+      description: "记忆快照初始管理员登录用户名"
+    snap_admin_password:
+      name: "快照管理员密码"
+      description: "记忆快照初始管理员密码（推荐使用自动生成的随机密码）"
+    snap_session_secret:
+      name: "快照会话密钥"
+      description: "记忆快照会话加密密钥（推荐使用自动生成的随机值）"
+    snap_tz:
+      name: "快照时区"
+      description: "记忆快照定时任务和保留策略使用的时区（如 UTC、Asia/Shanghai、America/New_York）"
+    snap_nmeme_api_key:
+      name: "快照 Nowledge Mem API 密钥"
+      description: "记忆快照的 Nowledge Mem API 访问密钥。留空则在应用内手动配置。"
+    snap_oidc_enabled:
+      name: "启用快照 OIDC 单点登录"
+      description: "启用记忆快照的懒猫平台 OpenID Connect 单点登录。客户端 ID/Secret 和回调地址由平台自动配置。"
+    snap_oidc_allowed_domains:
+      name: "快照 OIDC 允许域名"
+      description: "记忆快照 OIDC 登录允许的邮箱域名列表，逗号分隔（如 example.com）。留空则不限制。"
   en:
     ip_allowlist:
       name: "IP Allowlist"
       description: "Allowed IP addresses/CIDR ranges, comma-separated (e.g. 0.0.0.0/0,::/0 for all)"
+    snap_admin_username:
+      name: "Snap Admin Username"
+      description: "Bootstrap administrator username for Memory Snap initial login"
+    snap_admin_password:
+      name: "Snap Admin Password"
+      description: "Bootstrap administrator password for Memory Snap (auto-generated random password recommended)"
+    snap_session_secret:
+      name: "Snap Session Secret"
+      description: "Secret key for Memory Snap session encryption (auto-generated random value recommended)"
+    snap_tz:
+      name: "Snap Timezone"
+      description: "Memory Snap schedule times and retention boundaries timezone (e.g. UTC, Asia/Shanghai, America/New_York)"
+    snap_nmeme_api_key:
+      name: "Snap Nowledge Mem API Key"
+      description: "API key for the Nowledge Mem API source in Memory Snap. Leave empty to configure later."
+    snap_oidc_enabled:
+      name: "Enable Snap OIDC"
+      description: "Enable LazyCat platform OpenID Connect single sign-on for Memory Snap. Client ID/Secret and Redirect URL are auto-configured."
+    snap_oidc_allowed_domains:
+      name: "Snap OIDC Allowed Domains"
+      description: "Comma-separated list of allowed email domains for Memory Snap OIDC login (e.g. example.com). Leave empty to allow all."
