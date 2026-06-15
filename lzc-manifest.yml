@@ -35,7 +35,7 @@ application:
 services:
   mem:
     # https://www.wangdu.site/course/2109.html
-    image: docker.1ms.run/nowledgelabs/mem:0.9.11
+    image: docker.1ms.run/nowledgelabs/mem:0.9.12
     user: "root"
     environment:
       - NOWLEDGE_IP_ALLOWLIST={{.U.ip_allowlist}}
