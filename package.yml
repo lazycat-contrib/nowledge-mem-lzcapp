@@ -13,14 +13,14 @@ locales:
     entries.main.title: "NowledgeMem"
     entries.snap.title: "记忆快照"
     usage: |
-      首次运行会自动生成一个默认 API Key，请妥善保管——连接 AI 工具时需要用到。如不慎遗失，可从程序日志中查看。
+      首次运行会自动生成一个默认 API Key，请妥善保管——连接 AI 工具时需要用到，可从程序日志中查看。
   en:
     name: "NowledgeMem"
     description: "Your intelligences, AI assistants, and code tools share a set of memories."
     entries.main.title: "NowledgeMem"
     entries.snap.title: "Memory Snap"
     usage: |
-      First run will auto-generate a default API Key. Please save it carefully — it is required for connecting AI tools. If missed, you can find it in the application logs.
+      First run will auto-generate a default API Key. Please save it carefully — it is required for connecting AI tools.  you can find it in the application logs.
 
 permissions:
   required:
