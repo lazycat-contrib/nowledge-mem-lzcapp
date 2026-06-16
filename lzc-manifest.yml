@@ -12,7 +12,7 @@ application:
   public_path:
     - /
     - /snap
-    - /snap/
+    - /app
 
   upstreams:
     - location: /
@@ -34,11 +34,12 @@ application:
 
 services:
   mem:
-    # https://www.wangdu.site/course/2109.html
-    image: docker.1ms.run/nowledgelabs/mem:0.9.12
+    # nowledgelabs/mem:0.9.14
+    image: registry.lazycat.cloud/czyt/nowledgelabs/mem:d8e51541abcc59ce
     user: "root"
     environment:
       - NOWLEDGE_IP_ALLOWLIST={{.U.ip_allowlist}}
+      - NOWLEDGE_NAS_BOOTSTRAP=1
     binds:
       - /lzcapp/var/data:/var/lib/nowledge-mem
       - /lzcapp/var/config:/etc/nowledge-mem

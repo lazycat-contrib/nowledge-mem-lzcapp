@@ -1,5 +1,5 @@
 package: community.lazycat.app.nowledge-mem
-version: 0.9.12
+version: 0.9.14
 name: NowledgeMem
 description: "AI tools change.Your memory should not."
 author: "nowledge-co"
@@ -12,11 +12,15 @@ locales:
     description: "你的智能体、AI 助手、代码工具，共享一套记忆"
     entries.main.title: "NowledgeMem"
     entries.snap.title: "记忆快照"
+    usage: |
+      首次运行会自动生成一个默认 API Key，请妥善保管——连接 AI 工具时需要用到。如不慎遗失，可从程序日志中查看。
   en:
     name: "NowledgeMem"
     description: "Your intelligences, AI assistants, and code tools share a set of memories."
     entries.main.title: "NowledgeMem"
     entries.snap.title: "Memory Snap"
+    usage: |
+      First run will auto-generate a default API Key. Please save it carefully — it is required for connecting AI tools. If missed, you can find it in the application logs.
 
 permissions:
   required:
