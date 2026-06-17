@@ -32,3 +32,4 @@ permissions:
   required:
     - net.internet
     - lzcapp.user_delegate
+    - document.private
