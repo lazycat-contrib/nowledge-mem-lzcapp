@@ -1,0 +1,216 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat <<'USAGE'
+Usage: scripts/upgrade-mem.sh <version>
+
+Updates NowledgeMem to the given version, copies the matching mem image into
+the LazyCat registry, updates lzc-manifest.yml, builds the LPK, and commits the
+changed release files.
+
+Environment:
+  SOURCE_IMAGE=<image>       Override source image. Default: nowledgelabs/mem:<version>
+  COMMIT_MESSAGE=<message>   Override git commit message.
+  SKIP_COMMIT=1              Build without creating a git commit.
+  SKIP_BUILD=1               Update files and commit without running lzc-cli project build.
+  COPY_IMAGE_OUTPUT=<text>    Use captured copy-image output instead of calling LazyCat.
+                              Supports "uploaded:" and "lazycat-registry:" output.
+USAGE
+}
+
+die() {
+  echo "error: $*" >&2
+  exit 1
+}
+
+need_cmd() {
+  command -v "$1" >/dev/null 2>&1 || die "missing required command: $1"
+}
+
+update_package_version() {
+  local version=$1
+  local tmp
+  tmp=$(mktemp)
+
+  awk -v version="$version" '
+    BEGIN { updated = 0 }
+    !updated && /^version:[[:space:]]*/ {
+      print "version: " version
+      updated = 1
+      next
+    }
+    { print }
+    END {
+      if (!updated) {
+        print "package.yml does not contain a top-level version field" > "/dev/stderr"
+        exit 1
+      }
+    }
+  ' package.yml >"$tmp" || {
+    rm -f "$tmp"
+    return 1
+  }
+
+  mv "$tmp" package.yml
+}
+
+copy_image() {
+  local source_image=$1
+  local output
+
+  if [[ -n ${COPY_IMAGE_OUTPUT:-} ]]; then
+    output=$COPY_IMAGE_OUTPUT
+  else
+    echo "Copying image: $source_image" >&2
+    if command -v fish >/dev/null 2>&1 && fish -lc 'functions -q lzc-copy-image'; then
+      if ! output=$(COPY_IMAGE="$source_image" fish -lc 'lzc-copy-image "$COPY_IMAGE"' 2>&1); then
+        printf '%s\n' "$output" >&2
+        return 1
+      fi
+    else
+      need_cmd lzc-cli
+      if ! output=$(lzc-cli appstore copy-image "$source_image" 2>&1); then
+        printf '%s\n' "$output" >&2
+        return 1
+      fi
+    fi
+  fi
+
+  printf '%s\n' "$output" >&2
+  printf '%s\n' "$output" |
+    grep -Eo 'registry\.lazycat\.cloud/[A-Za-z0-9._:@/-]+' |
+    tail -n 1 || true
+}
+
+update_manifest_image() {
+  local version=$1
+  local image=$2
+  local tmp
+  tmp=$(mktemp)
+
+  awk -v version="$version" -v image="$image" '
+    BEGIN {
+      in_mem = 0
+      updated_comment = 0
+      updated_image = 0
+    }
+    /^  mem:[[:space:]]*$/ {
+      in_mem = 1
+      print
+      next
+    }
+    in_mem && /^  [A-Za-z0-9_.-]+:[[:space:]]*$/ {
+      in_mem = 0
+    }
+    in_mem && /^    #[[:space:]]*nowledgelabs\/mem:/ {
+      print "    # nowledgelabs/mem:" version
+      updated_comment = 1
+      next
+    }
+    in_mem && /^    image:[[:space:]]*/ {
+      print "    image: " image
+      updated_image = 1
+      next
+    }
+    { print }
+    END {
+      if (!updated_comment) {
+        print "lzc-manifest.yml mem service image comment was not found" > "/dev/stderr"
+        exit 1
+      }
+      if (!updated_image) {
+        print "lzc-manifest.yml mem service image field was not found" > "/dev/stderr"
+        exit 1
+      }
+    }
+  ' lzc-manifest.yml >"$tmp" || {
+    rm -f "$tmp"
+    return 1
+  }
+
+  mv "$tmp" lzc-manifest.yml
+}
+
+package_id() {
+  awk -F':[[:space:]]*' '/^package:[[:space:]]*/ { gsub(/"/, "", $2); print $2; exit }' package.yml
+}
+
+build_lpk() {
+  need_cmd lzc-cli
+  echo "Building LPK..." >&2
+  lzc-cli project build -f lzc-build.yml
+}
+
+commit_release() {
+  local version=$1
+  local lpk=$2
+  local message=${COMMIT_MESSAGE:-"更新 NowledgeMem 到 ${version}"}
+
+  need_cmd git
+  git add package.yml lzc-manifest.yml "$lpk"
+
+  if git diff --cached --quiet; then
+    echo "No staged release changes; skipping commit." >&2
+    return 0
+  fi
+
+  git commit -m "$message"
+}
+
+main() {
+  if [[ ${1:-} == "-h" || ${1:-} == "--help" ]]; then
+    usage
+    exit 0
+  fi
+
+  local version=${1:-}
+  [[ -n "$version" ]] || {
+    usage >&2
+    exit 1
+  }
+  [[ "$version" != *[[:space:]]* ]] || die "version must not contain whitespace"
+
+  need_cmd awk
+  need_cmd grep
+  need_cmd tail
+  need_cmd mktemp
+
+  local repo_root
+  repo_root=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+  cd "$repo_root"
+
+  [[ -f package.yml ]] || die "package.yml not found"
+  [[ -f lzc-manifest.yml ]] || die "lzc-manifest.yml not found"
+  [[ -f lzc-build.yml ]] || die "lzc-build.yml not found"
+
+  local source_image=${SOURCE_IMAGE:-"nowledgelabs/mem:${version}"}
+  update_package_version "$version"
+
+  local lazycat_image
+  lazycat_image=$(copy_image "$source_image")
+  [[ -n "$lazycat_image" ]] || die "failed to parse LazyCat registry image from copy-image output"
+  update_manifest_image "$version" "$lazycat_image"
+
+  local pkg
+  pkg=$(package_id)
+  [[ -n "$pkg" ]] || die "failed to parse package id from package.yml"
+  local lpk="${pkg}-v${version}.lpk"
+
+  if [[ ${SKIP_BUILD:-0} != "1" ]]; then
+    build_lpk
+    [[ -f "$lpk" ]] || die "expected build output not found: $lpk"
+  fi
+
+  if [[ ${SKIP_COMMIT:-0} != "1" ]]; then
+    [[ -f "$lpk" ]] || die "cannot commit missing LPK: $lpk"
+    commit_release "$version" "$lpk"
+  fi
+
+  echo "Release files updated for ${version}:"
+  echo "  package.yml"
+  echo "  lzc-manifest.yml"
+  echo "  ${lpk}"
+}
+
+main "$@"
