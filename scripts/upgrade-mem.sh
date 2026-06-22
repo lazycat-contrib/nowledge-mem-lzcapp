@@ -3,19 +3,30 @@ set -euo pipefail
 
 usage() {
   cat <<'USAGE'
-Usage: scripts/upgrade-mem.sh <version>
+Usage: scripts/upgrade-mem.sh <version> [options]
 
 Updates NowledgeMem to the given version, copies the matching mem image into
 the LazyCat registry, updates lzc-manifest.yml, builds the LPK, and commits the
 changed release files.
 
+Options:
+  --publish           Publish the LPK to LazyCat app store after build
+  --push              Push git commit to remote (default if commit is created)
+  --no-push           Skip git push
+  --no-commit         Skip git commit
+  --no-build          Skip LPK build
+  --changelog <msg>   Changelog message for app store publish
+
 Environment:
   SOURCE_IMAGE=<image>       Override source image. Default: nowledgelabs/mem:<version>
   COMMIT_MESSAGE=<message>   Override git commit message.
+  CHANGELOG=<message>        Changelog for app store publish.
   SKIP_COMMIT=1              Build without creating a git commit.
+  SKIP_PUSH=1                Skip pushing to remote after commit.
   SKIP_BUILD=1               Update files and commit without running lzc-cli project build.
-  COPY_IMAGE_OUTPUT=<text>    Use captured copy-image output instead of calling LazyCat.
-                              Supports "uploaded:" and "lazycat-registry:" output.
+  PUBLISH=1                  Publish to LazyCat app store after build.
+  COPY_IMAGE_OUTPUT=<text>   Use captured copy-image output instead of calling LazyCat.
+                             Supports "uploaded:" and "lazycat-registry:" output.
 USAGE
 }
 
@@ -158,13 +169,89 @@ commit_release() {
   git commit -m "$message"
 }
 
+push_release() {
+  local current_branch
+  current_branch=$(git branch --show-current)
+  echo "Pushing to origin/${current_branch}..." >&2
+  git push origin "$current_branch"
+  echo "Push completed." >&2
+}
+
+publish_lpk() {
+  local lpk=$1
+  local changelog=${CHANGELOG:-""}
+
+  need_cmd lzc-cli
+
+  if [[ ! -f "$lpk" ]]; then
+    die "LPK file not found: $lpk"
+  fi
+
+  if [[ -z "$changelog" ]]; then
+    changelog="更新到 $(awk '/^version:/ {print $2}' package.yml)"
+  fi
+
+  echo "Publishing to LazyCat app store..." >&2
+  echo "  LPK: $lpk" >&2
+  echo "  Changelog: $changelog" >&2
+  lzc-cli appstore publish "$lpk" --changelog "$changelog" --clang zh
+  echo "Publish completed." >&2
+}
+
 main() {
   if [[ ${1:-} == "-h" || ${1:-} == "--help" ]]; then
     usage
     exit 0
   fi
 
-  local version=${1:-}
+  local version=""
+  local do_publish=${PUBLISH:-0}
+  local do_push=${SKIP_PUSH:-0}
+  local do_commit=${SKIP_COMMIT:-0}
+  local do_build=${SKIP_BUILD:-0}
+  local changelog=${CHANGELOG:-""}
+
+  # Parse arguments
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --publish)
+        do_publish=1
+        shift
+        ;;
+      --push)
+        do_push=0
+        shift
+        ;;
+      --no-push)
+        do_push=1
+        shift
+        ;;
+      --no-commit)
+        do_commit=1
+        shift
+        ;;
+      --no-build)
+        do_build=1
+        shift
+        ;;
+      --changelog)
+        changelog="$2"
+        shift 2
+        ;;
+      -*)
+        die "unknown option: $1"
+        ;;
+      *)
+        if [[ -z "$version" ]]; then
+          version="$1"
+        else
+          die "unexpected argument: $1"
+        fi
+        shift
+        ;;
+    esac
+  done
+
   [[ -n "$version" ]] || {
     usage >&2
     exit 1
@@ -197,20 +284,35 @@ main() {
   [[ -n "$pkg" ]] || die "failed to parse package id from package.yml"
   local lpk="${pkg}-v${version}.lpk"
 
-  if [[ ${SKIP_BUILD:-0} != "1" ]]; then
+  if [[ $do_build != "1" ]]; then
     build_lpk
     [[ -f "$lpk" ]] || die "expected build output not found: $lpk"
   fi
 
-  if [[ ${SKIP_COMMIT:-0} != "1" ]]; then
+  if [[ $do_commit != "1" ]]; then
     [[ -f "$lpk" ]] || die "cannot commit missing LPK: $lpk"
     commit_release "$version" "$lpk"
   fi
 
-  echo "Release files updated for ${version}:"
-  echo "  package.yml"
-  echo "  lzc-manifest.yml"
-  echo "  ${lpk}"
+  # Push to remote (default after commit, unless --no-push)
+  if [[ $do_push != "1" ]]; then
+    push_release
+  fi
+
+  # Publish to app store
+  if [[ $do_publish == "1" ]]; then
+    publish_lpk "$lpk" "$changelog"
+  fi
+
+  echo ""
+  echo "=== Release ${version} completed ==="
+  echo "  package.yml     - version updated"
+  echo "  lzc-manifest.yml - image updated"
+  echo "  ${lpk}          - built"
+  [[ $do_commit != "1" ]] && echo "  git commit      - created"
+  [[ $do_push != "1" ]]   && echo "  git push        - pushed to remote"
+  [[ $do_publish == "1" ]] && echo "  app store       - published"
 }
 
+export CHANGELOG="${CHANGELOG:-}"
 main "$@"
