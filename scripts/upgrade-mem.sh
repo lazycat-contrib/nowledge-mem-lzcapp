@@ -18,7 +18,7 @@ Options:
   --changelog <msg>   Changelog message for app store publish
 
 Environment:
-  SOURCE_IMAGE=<image>       Override source image. Default: nowledgelabs/mem:<version>
+  SOURCE_IMAGE=<image>       Override source image. Default: nowledgelabs/mem:<version>-vulkan
   COMMIT_MESSAGE=<message>   Override git commit message.
   CHANGELOG=<message>        Changelog for app store publish.
   SKIP_COMMIT=1              Build without creating a git commit.
@@ -115,7 +115,7 @@ update_manifest_image() {
       in_mem = 0
     }
     in_mem && /^    #[[:space:]]*nowledgelabs\/mem:/ {
-      print "    # nowledgelabs/mem:" version
+      print "    # nowledgelabs/mem:" version "-vulkan"
       updated_comment = 1
       next
     }
@@ -271,7 +271,7 @@ main() {
   [[ -f lzc-manifest.yml ]] || die "lzc-manifest.yml not found"
   [[ -f lzc-build.yml ]] || die "lzc-build.yml not found"
 
-  local source_image=${SOURCE_IMAGE:-"nowledgelabs/mem:${version}"}
+  local source_image=${SOURCE_IMAGE:-"nowledgelabs/mem:${version}-vulkan"}
   update_package_version "$version"
 
   local lazycat_image
