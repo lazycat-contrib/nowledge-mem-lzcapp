@@ -62,8 +62,8 @@ services:
       start_period: 90s
 
   nowledge-mem-snap:
-    # czyt/nowledge-mem-snap:v0.2.2
-    image: registry.lazycat.cloud/czyt/czyt/nowledge-mem-snap:d43afc55a9e2b6d0
+    # czyt/nowledge-mem-snap:v0.2.4
+    image: registry.lazycat.cloud/czyt/czyt/nowledge-mem-snap:2e3e72fe8e86a39c
     user: root
     depends_on:
       - mem
