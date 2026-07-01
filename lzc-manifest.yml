@@ -39,8 +39,8 @@ usage: |
 
 services:
   mem:
-    # nowledgelabs/mem:0.10.6-vulkan
-    image: registry.lazycat.cloud/czyt/nowledgelabs/mem:8f98e1bd1621dff2
+    # nowledgelabs/mem:0.10.7-vulkan
+    image: registry.lazycat.cloud/czyt/nowledgelabs/mem:c9401a5a8f0b6c6a
     user: "root"
     environment:
       - NOWLEDGE_IP_ALLOWLIST={{.U.ip_allowlist}}
