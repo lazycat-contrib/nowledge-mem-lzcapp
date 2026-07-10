@@ -63,8 +63,8 @@ services:
 
 
   nowledge-mem-snap:
-    # czyt/nowledge-mem-snap:v0.2.4
-    image: registry.lazycat.cloud/czyt/czyt/nowledge-mem-snap:2e3e72fe8e86a39c
+    # czyt/nowledge-mem-snap:v0.2.5
+    image: registry.lazycat.cloud/czyt/czyt/nowledge-mem-snap:588a01b8b8a76699
     user: root
     depends_on:
       - mem
