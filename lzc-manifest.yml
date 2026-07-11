@@ -8,20 +8,16 @@ application:
     - id: snap
       title: "Memory Snap"
       path: /snap
-
   public_path:
     - /
     - /snap
     - /app
-
   upstreams:
     - location: /
       backend: http://mem:14242/
-
     - location: /snap/
       backend: http://nowledge-mem-snap:14335
       disable_trim_location: true
-
   injects:
     - id: snap-login-autofill
       when:
@@ -31,16 +27,15 @@ application:
           params:
             user: "{{ .U.snap_admin_username }}"
             password: "{{ .U.snap_admin_password }}"
-
 usage: |
   On first run, NowledgeMem auto-generates a default API key. Keep it safe; AI tools need this key to connect, and you can find it in the application logs.
   This app imports LazyCat local Skills and MCP Provider resources. AI agents should load /lzcsys/run/pkgm/resources/skills/system/lazycat-local-resource.skill/SKILL.md first, then discover available resources from /lzcapp/run/resources/skills/ and /lzcapp/run/resources/mcp-providers/.
   Each MCP Provider supplies an endpoint in mcp.yml. Build the final URL as http://app.<package-id>.lzcx<endpoint>. When calling MCP providers from other apps, the program must forward the real user's X-HC-USER-TICKET.
-
 services:
   mem:
     # nowledgelabs/mem:0.10.22-vulkan
-    image: registry.lazycat.cloud/czyt/nowledgelabs/mem:2dae0c898a81ea1e
+    # upstream: docker.io/nowledgelabs/mem:0.10.23-vulkan
+    image: registry.lazycat.cloud/czyt/nowledgelabs/mem:e2183982dfcd39b9
     user: "root"
     environment:
       - NOWLEDGE_IP_ALLOWLIST={{.U.ip_allowlist}}
@@ -49,7 +44,6 @@ services:
       - /lzcapp/var/data:/var/lib/nowledge-mem
       - /lzcapp/var/config:/etc/nowledge-mem
       - /lzcapp/cache/nowledge-mem:/var/cache/nowledge-mem
-
     healthcheck:
       test:
         - CMD
@@ -60,11 +54,10 @@ services:
       timeout: 5s
       retries: 3
       start_period: 90s
-
-
   nowledge-mem-snap:
     # czyt/nowledge-mem-snap:v0.2.5
-    image: registry.lazycat.cloud/czyt/czyt/nowledge-mem-snap:588a01b8b8a76699
+    # upstream: docker.io/czyt/nowledge-mem-snap:v0.2.5
+    image: registry.lazycat.cloud/czyt/czyt/nowledge-mem-snap:6f17fc52521aee5b
     user: root
     depends_on:
       - mem

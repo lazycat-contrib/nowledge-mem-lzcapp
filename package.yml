@@ -1,15 +1,13 @@
 package: community.lazycat.app.nowledge-mem
-version: 0.10.22
+version: 0.10.23
 name: NowledgeMem
 description: "AI tools change.Your memory should not."
 author: "nowledge-co"
 homepage: https://mem.nowledge.co
 min_os_version: 1.5.2
-
 import_resources:
   - kind: skills
   - kind: mcp-providers
-
 locales:
   zh:
     name: "NowledgeMem"
@@ -29,7 +27,6 @@ locales:
       On first run, NowledgeMem auto-generates a default API key. Keep it safe; AI tools need this key to connect, and you can find it in the application logs.
       This app imports LazyCat local Skills and MCP Provider resources. AI agents should load /lzcsys/run/pkgm/resources/skills/system/lazycat-local-resource.skill/SKILL.md first, then discover available resources from /lzcapp/run/resources/skills/ and /lzcapp/run/resources/mcp-providers/.
       Each MCP Provider supplies an endpoint in mcp.yml. Build the final URL as http://app.<package-id>.lzcx<endpoint>. When calling MCP providers from other apps, the program must forward the real user's X-HC-USER-TICKET.
-
 permissions:
   required:
     - net.internet
