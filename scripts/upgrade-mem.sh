@@ -7,7 +7,8 @@ Usage: scripts/upgrade-mem.sh <version> [options]
 
 Updates NowledgeMem to the given version, copies the matching mem image into
 the LazyCat registry, updates lzc-manifest.yml, builds the LPK, and commits the
-changed release files.
+changed source files. Built LPKs remain untracked and are published as GitHub
+Release assets by GitHub Actions.
 
 Options:
   --publish           Publish the LPK to LazyCat app store after build
@@ -150,6 +151,7 @@ package_id() {
 build_lpk() {
   need_cmd lzc-cli
   echo "Building LPK..." >&2
+  mkdir -p dist
   lzc-cli project build -f lzc-build.yml
 }
 
@@ -159,7 +161,7 @@ commit_release() {
   local message=${COMMIT_MESSAGE:-"更新 NowledgeMem 到 ${version}"}
 
   need_cmd git
-  git add package.yml lzc-manifest.yml "$lpk"
+  git add package.yml lzc-manifest.yml
 
   if git diff --cached --quiet; then
     echo "No staged release changes; skipping commit." >&2
@@ -282,7 +284,7 @@ main() {
   local pkg
   pkg=$(package_id)
   [[ -n "$pkg" ]] || die "failed to parse package id from package.yml"
-  local lpk="${pkg}-v${version}.lpk"
+  local lpk="dist/${pkg}-v${version}.lpk"
 
   if [[ $do_build != "1" ]]; then
     build_lpk

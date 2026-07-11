@@ -1,5 +1,5 @@
 manifest: ./lzc-manifest.yml
-pkgout: ./
+pkgout: ./dist
 icon: ./icon.png
 
 compose_override:
