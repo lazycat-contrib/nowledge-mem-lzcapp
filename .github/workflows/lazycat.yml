@@ -24,6 +24,8 @@ jobs:
       config: .github/lazycat-action.yml
       dry-run: ${{ github.event_name == 'pull_request' }}
       versioned-release-asset: true
-    # The LazyCat token may be defined as an organization or repository
-    # Secret. A repository Secret with the same name takes precedence.
-    secrets: inherit
+    secrets:
+      LAZYCAT_TOKEN: ${{ secrets.LAZYCAT_TOKEN }}
+      APPSTORE_URL: ${{ secrets.APPSTORE_URL }}
+      APPSTORE_TOKEN: ${{ secrets.APPSTORE_TOKEN }}
+      PRIVATE_STORE_GROUP_CODES: ${{ secrets.PRIVATE_STORE_GROUP_CODES }}
