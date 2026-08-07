@@ -54,6 +54,19 @@ services:
       timeout: 5s
       retries: 3
       start_period: 90s
+    setup_scripts: |
+      for dir in /var/lib/nowledge-mem /etc/nowledge-mem /var/cache/nowledge-mem; do
+        if [ -d "$dir" ]; then
+          owner=$(stat -c '%u:%g' "$dir")
+          if [ "$owner" != "1001:1001" ]; then
+            echo "fix permission for [$dir]  to ($owner) -> 1001:1001)"
+            chown -R 1001:1001 "$dir"
+          else
+            echo "[$dir] permission check pass ✓"
+          fi
+        fi
+      done
+
   nowledge-mem-snap:
     # czyt/nowledge-mem-snap:v0.2.5
     # upstream: docker.io/czyt/nowledge-mem-snap:v0.2.5
