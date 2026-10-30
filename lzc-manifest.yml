@@ -67,9 +67,9 @@ services:
         fi
       done
   nowledge-mem-snap:
-    # czyt/nowledge-mem-snap:v0.2.5
-    # upstream: docker.io/czyt/nowledge-mem-snap:v0.2.6
-    image: registry.lazycat.cloud/czyt/czyt/nowledge-mem-snap:d921aebfb2391330
+    # czyt/nowledge-mem-snap:v0.2.8
+    # upstream: docker.io/czyt/nowledge-mem-snap:v0.2.8
+    image:  registry.lazycat.cloud/czyt/czyt/nowledge-mem-snap:625b000a94980959
     user: root
     depends_on:
       - mem
