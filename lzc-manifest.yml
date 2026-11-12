@@ -34,8 +34,8 @@ usage: |
 services:
   mem:
     # nowledgelabs/mem:0.10.22-vulkan
-    # upstream: docker.io/nowledgelabs/mem:0.10.117-vulkan
-    image: registry.lazycat.cloud/czyt/nowledgelabs/mem:d26eb2bcda0a8b6a
+    # upstream: docker.io/nowledgelabs/mem:0.10.118-vulkan
+    image: registry.lazycat.cloud/czyt/nowledgelabs/mem:eb6c3483918e5c5c
     user: "root"
     environment:
       - NOWLEDGE_IP_ALLOWLIST={{.U.ip_allowlist}}
